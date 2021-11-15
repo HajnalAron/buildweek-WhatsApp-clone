@@ -94,8 +94,9 @@ describe("Testing the user endpoints", () => {
   });
 
 
-  it("should test endpoint for changing user informations ", async () => {
-    const response = await request.put("/users/me").send({newUserData: {username: "someOtherGuy"}, accessToken: token} )
+  it("should test endpoint for changing user name ", async () => {
+    const response = await request.put("/users/me").send({newUserData: {username: "someOtherGuy"},
+     accessToken: token} )
     console.log(token) 
     expect(response.status).toBe(200);
     
@@ -110,47 +111,46 @@ describe("Testing the user endpoints", () => {
   });
 
 
-  // it("should test endpoint for user/me/avatar", async () => {
-  //   const response = await request.post("/users/me/avatar").send({user: {avatar: "123123"},  accessToken: token});
-  //   expect(response.status).toBe(200);
-  //   expect(response.body).toBe(
-  //     {
-  //       _id: testUserId,
-  //       username: "someOtherGuy",
-  //       email: "test@strive.com",
-  //       avatar: "123123"
-  //     }
-  //   )
-  // })
+   it("should test endpoint for user/me/avatar", async () => {
+    const response = await request.post("/users/me/avatar").send({ newUserData:{ avatar: "123123"},
+      accessToken: token});
+    expect(response.status).toBe(200);
+    expect(response.body).toStrictEqual(
+      {
+        _id: testUserId,
+        username: "someOtherGuy",
+        email: "test@strive.com",
+        avatar: "123123"
+      }
+    )
+  })
 
 
-  // it("should test endpoint get/users/:id", async () => {
-  //   const response = await request.get(`/users/${testUserId}`);
-  //   expect(response.status).toBe(200);
-  //   expect(response.body).toBe(
-  //     {
-  //       _id: testUserId,
-  //       username: "someOtherGuy",
-  //       email: "test@strive.com",
-  //       avatar: "123123"
-  //     }
-  //   )
-  // });
+  it("should test endpoint get/users/:id", async () => {
+    const response = await request.get(`/users/${testUserId}`);
+    expect(response.status).toBe(200);
+    expect(response.body).toStrictEqual(
+      {
+        _id: testUserId,
+        username: "someOtherGuy",
+        email: "test@strive.com",
+        avatar: "123123"
+      }
+    )
+  });
 
 
-  // // it("should test endpoint users/session", async () => {
-  // //   const response = await request.get("/users/session").send(validCredentials)
-  // //   expect(response.status).toBe(200);
-
-    
-  // // });
   
-  // it("should test endpoint users/session", async () => {
-  //   const response = await request.get("/users/session").send(validCredentials)
-  //   expect(response.status).toBe(200);
-  //   expect(response.body.accessToken === token).toBe(false)
+
     
-  // });
+  
+  
+  it("should test endpoint users/session", async () => {
+    const response = await request.post("/users/session").send(validCredentials)
+    expect(response.status).toBe(200);
+    expect(response.body.accessToken === token).toBe(false)
+    
+  });
 
   afterAll((done) => {
     mongoose.connection.dropDatabase().then(() => {

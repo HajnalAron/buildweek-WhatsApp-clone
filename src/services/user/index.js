@@ -3,6 +3,7 @@ import UserSchema from "./schema.js";
 import { generateAccessToken } from "../auth/token.js";
 import { JWTAuthMiddleware } from "../auth/authMiddle.js";
 
+
 const userRouter = express.Router();
 
 userRouter.post("/account", async (req, res, next) => {
@@ -35,11 +36,16 @@ userRouter.get("/", async (req, res, next) => {
 
 userRouter.put("/me", JWTAuthMiddleware, async (req, res, next) => {
   try {
+    
     const filter = { _id: req.user._id };
+    console.log(filter)
     const update = { ...req.body.newUserData };
-    const updatedUser = await UserModel.findOneAndUpdate(filter, update, {
+    console.log(update)
+    const updatedUser = await UserSchema.findOneAndUpdate(filter, update, {
       returnOriginal: false,
-    });
+     //new: true
+     
+    });console.log(updatedUser)
     await updatedUser.save();
     res.send(updatedUser);
 
@@ -48,8 +54,23 @@ userRouter.put("/me", JWTAuthMiddleware, async (req, res, next) => {
     next(error);
   }
 });
-userRouter.post("/account", async (req, res, next) => {
+userRouter.post("/me/avatar", JWTAuthMiddleware, async (req, res, next) => {
   try {
+
+    const filter = { _id: req.user._id };
+    console.log(req.user)
+    
+    const update = { ...req.user._doc, avatar: req.body.newUserData.avatar };
+    console.log(update)
+        const updatedUser = await UserSchema.findOneAndUpdate(filter, update, {
+     returnOriginal: false,
+     
+     
+    });
+
+    await updatedUser.save();
+    res.send(updatedUser);
+
   } catch (error) {
     next(error);
   }
@@ -64,5 +85,28 @@ userRouter.get("/me", JWTAuthMiddleware, async (req, res, next) => {
     next(error);
   }
 });
+
+userRouter.get("/:id",  async (req, res, next) => {
+  try {
+    const user = await UserSchema.findById( req.params.id)
+    res.send(user)
+    
+  } catch (error) {
+    next(error);
+  }
+})
+
+userRouter.post("/session",  async (req, res, next) => {
+
+  try {
+    const user = await UserSchema.checkCredentials(req.body)
+    const newAccessToken = await generateAccessToken({_id: user._id})
+    console.log(newAccessToken)
+    
+    res.send(newAccessToken)
+  } catch (error) {
+    next(error);
+  }
+})
 
 export default userRouter;

@@ -5,7 +5,7 @@ export const UserSchema = new mongoose.Schema({
   username: { type: String, required: true },
   password: { type: String, required: true },
   email: { type: String, required: true },
-  avatar: { type: String, required: false },
+  avatar: { type: String, required: false }
 });
 
 UserSchema.pre("save", async function (next) {
@@ -27,10 +27,11 @@ UserSchema.methods.toJSON = function () {
 
 UserSchema.statics.checkCredentials = async function ({email, password}) {
   const user = await this.findOne({email})
-
+console.log({email, password, user})
   if(user) {
     const isMatch = await bcrypt.compare(password, user.password)
     if(isMatch) return user
+
     else return false
   } else return false
 }

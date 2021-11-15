@@ -1,7 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import listEndpoints from 'express-list-endpoints'
-import userRouter from './services/user'
+import userRouter from './services/user/index.js'
 
 const app = express()
 app.use(cors())
