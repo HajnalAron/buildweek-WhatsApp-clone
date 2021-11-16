@@ -49,9 +49,46 @@ io.on("connection", async (socket) => {
     onlineUsers = onlineUsers.filter((u) => u.socketId !== socket.id);
   });
 
-  //   socket.on("outgoing-msg");
-  //   socket.on("incoming-msg");
+  socket.on("outgoing-msg", async ({message, requestTargetId})=> {
+    try {
+      console.log(message)
+    const accessToken = socket.handshake.headers["access-token"];
+    const decodedToken = await verifyJWT(accessToken);
+    const requesterId = decodedToken;
+    const reciverId = mongoose.Types.ObjectId(requestTargetId);
+    message.sender = requesterId
+    const commonChat = await ChatSchema.find({
+      $and: [
+        { members: { $in: [requesterId] } },
+        { members: { $in: [reciverId] } }
+      ]
+    });
+    // console.log(commonChat);
+
+    if (commonChat.length > 0) {
+      const updatedCommonChat = await ChatSchema.findByIdAndUpdate(
+        commonChat[0]._id,
+        { $push: { history: message } },
+        { new: true }
+      );
+      console.log(updatedCommonChat)
+        //1. send the new chat data to the other client, socket.to(clinetID).emit("incoming msg ", messageData)
+        //2. make the other client refetch the message data socket.to(clientId).emit("incongi message", id of the chat)
+    } else {
+      const newChat = await new ChatSchema({
+        members: [reciverId, requesterId],
+        history: [message]
+      }).save();
+    }
+  } catch (error) {
+    socket.emit("error", error)
+  }
 });
+  });
+
+
+  // socket.on("incoming-msg")   
+
 
 // connect
 // disconnect
