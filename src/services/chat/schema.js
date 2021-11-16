@@ -19,7 +19,7 @@ const MessageSchema = new Schema(
 const ChatSchema = new Schema(
     {
         members: [{type: Schema.Types.ObjectId, ref: "User", required: true}],
-        // name: {type: String},
+        picture: {type: String, required: false},
         history: { default:[], type: [MessageSchema]},      
     }
 )
