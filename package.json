@@ -24,7 +24,6 @@
   },
   "scripts": {
     "dev": "nodemon -r dotenv/config ./src",
-
     "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest",
     "watch": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --watchAll"
   },
