@@ -2,7 +2,6 @@ import express from "express";
 import { JWTAuthMiddleware } from "../auth/authMiddle.js";
 import ChatSchema from "./schema.js";
 import mongoose from "mongoose";
-import { HttpError } from "http-errors";
 
 const chatRouter = express.Router();
 

@@ -3,16 +3,11 @@ import { verifyJWT } from "./token.js";
 import UserModel from "../user/schema.js";
 
 export const JWTAuthMiddleware = async (req, res, next) => {
-  if (!req.body.accessToken) {
-    next(
-      createHttpError(
-        401,
-        "Please provide the access Token in request body! 👀"
-      )
-    );
+  if (!req.headers.authorization) {
+    next(createHttpError(401, "Please provide valid authorization header 👀"));
   } else {
     try {
-      const token = req.body.accessToken
+      const token = req.headers.authorization;
       const decodedToken = await verifyJWT(token);
       const user = await UserModel.findById(decodedToken._id);
       if (user) {
@@ -26,5 +21,3 @@ export const JWTAuthMiddleware = async (req, res, next) => {
     }
   }
 };
-
-
