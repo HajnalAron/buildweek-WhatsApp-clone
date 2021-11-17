@@ -76,9 +76,11 @@ userRouter.get("/me", JWTAuthMiddleware, async (req, res, next) => {
   }
 });
 
-userRouter.get("/:id", async (req, res, next) => {
+userRouter.get("/user/:id", async (req, res, next) => {
   try {
+    console.log(req.params);
     const user = await UserSchema.findById(req.params.id);
+    console.log(user);
     res.send(user);
   } catch (error) {
     next(error);
