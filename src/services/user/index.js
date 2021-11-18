@@ -93,7 +93,7 @@ userRouter.post("/session", async (req, res, next) => {
     const newAccessToken = await generateAccessToken({ _id: user._id });
     console.log(newAccessToken);
 
-    res.send(newAccessToken);
+    res.send({accessToken: newAccessToken});
   } catch (error) {
     next(error);
   }
