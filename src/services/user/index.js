@@ -24,7 +24,8 @@ userRouter.get("/", async (req, res, next) => {
       user = await UserSchema.find({});
     } else {
       user = await UserSchema.find({
-        $or: [{ username: userName }, { email: userEmail }]
+        
+        $or: [{ username: {$regex: userName} }, { email: {$regex: userEmail} }]
       });
     }
     res.send(user);
