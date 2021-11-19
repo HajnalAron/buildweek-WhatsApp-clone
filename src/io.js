@@ -16,26 +16,33 @@ let onlineUsers = [];
 io.on("connection", async (socket) => {
   try {
     const accessToken = socket.handshake.auth["Access-Token"];
+
     if (accessToken) {
       const decodedToken = await verifyJWT(accessToken);
-
       if (decodedToken) {
         const chatRooms = await ChatSchema.find({
-          members: { $in: [decodedToken] }
+          members: { $in: [decodedToken._id] }
         });
-
-        chatRooms.map((r) => {
-          socket.join(r._id);
-          socket.emit("join", r._id);
-        });
-
-        const user = await UserSchema.findById(decodedToken);
-
+        const user = await UserSchema.findById(decodedToken._id);
         onlineUsers.push({
           username: user.username,
           _id: user._id,
-          socketId: socket.id
+          socketId: socket.id,
+          rooms: []
         });
+        // const userRoomArrayIndex = onlineUsers.findIndex(
+        //   (targetUser) => user._id === targetUser._id
+        // );
+
+        chatRooms.map((r) => {
+          console.log(r._id, "room join id");
+          socket.join(r._id.valueOf());
+          socket.emit("join", r._id);
+        });
+
+        // onlineUsers.rooms.map((r) => {
+        //   socket.to(r).emit("userLoggedIn", user_id);
+        // });
       }
     } else {
       const error = createHttpError(404, { message: "Missing access token" });
@@ -48,6 +55,9 @@ io.on("connection", async (socket) => {
 
   socket.on("disconnect", () => {
     onlineUsers = onlineUsers.filter((u) => u.socketId !== socket.id);
+    // onlineUsers.rooms.map((r) => {
+    //   socket.to(r).emit("userLoggedOut", user_id);
+    // });
   });
 
   socket.on("outgoing-msg", async (requestData) => {
@@ -69,31 +79,27 @@ io.on("connection", async (socket) => {
           { $push: { history: message } },
           { new: true }
         );
-        socket.emit("incoming-msg", updatedCommonChat._id);
-        socket
-          .to(updatedCommonChat._id)
-          .emit("incoming-msg", updatedCommonChat._id);
+        io.to(updatedCommonChat._id.valueOf()).emit(
+          "incoming-msg",
+          updatedCommonChat._id
+        );
       } else {
         const newChat = await new ChatSchema({
-          members: [reciverId, requesterId],
-          history: [message]
+          members: [requestTargetId, decodedToken],
+          history: [{ ...message }]
         }).save();
-        const targetSocketId = onlineUsers.find(
-          (user) => user._id === requestTargetId
+
+        const targetSocket = onlineUsers.find(
+          (user) => user._id.valueOf() === requestTargetId
         );
+
+        socket.emit("join", newChat._id.valueOf());
+        socket.to(targetSocket.socketId).emit("join", newChat._id.valueOf());
         socket.emit("incoming-msg", newChat._id);
-        socket.to(targetSocketId).emit("join", newChat._id);
-        socket.to(newChat._id).emit("incoming-msg", newChat._id);
+        io.to(targetSocket.socketId).emit("incoming-msg", newChat._id);
       }
     } catch (error) {
       socket.emit("error", error);
     }
   });
 });
-
-// socket.on("incoming-msg")
-
-// connect
-// disconnect
-// outgoing-msg
-// incoming-msg

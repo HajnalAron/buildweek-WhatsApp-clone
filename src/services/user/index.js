@@ -24,8 +24,10 @@ userRouter.get("/", async (req, res, next) => {
       user = await UserSchema.find({});
     } else {
       user = await UserSchema.find({
-        
-        $or: [{ username: {$regex: userName} }, { email: {$regex: userEmail} }]
+        $or: [
+          { username: { $regex: userName } },
+          { email: { $regex: userEmail } }
+        ]
       });
     }
     res.send(user);
@@ -37,14 +39,14 @@ userRouter.get("/", async (req, res, next) => {
 userRouter.put("/me", JWTAuthMiddleware, async (req, res, next) => {
   try {
     const filter = { _id: req.user._id };
-    console.log(filter);
+
     const update = { ...req.body.newUserData };
-    console.log(update);
+
     const updatedUser = await UserSchema.findOneAndUpdate(filter, update, {
       returnOriginal: false
       //new: true
     });
-    console.log(updatedUser);
+
     await updatedUser.save();
     res.send(updatedUser);
   } catch (error) {
@@ -54,10 +56,9 @@ userRouter.put("/me", JWTAuthMiddleware, async (req, res, next) => {
 userRouter.post("/me/avatar", JWTAuthMiddleware, async (req, res, next) => {
   try {
     const filter = { _id: req.user._id };
-    console.log(req.user);
 
     const update = { ...req.user._doc, avatar: req.body.newUserData.avatar };
-    console.log(update);
+
     const updatedUser = await UserSchema.findOneAndUpdate(filter, update, {
       returnOriginal: false
     });
@@ -79,9 +80,8 @@ userRouter.get("/me", JWTAuthMiddleware, async (req, res, next) => {
 
 userRouter.get("/user/:id", async (req, res, next) => {
   try {
-    console.log(req.params);
     const user = await UserSchema.findById(req.params.id);
-    console.log(user);
+
     res.send(user);
   } catch (error) {
     next(error);
@@ -92,9 +92,8 @@ userRouter.post("/session", async (req, res, next) => {
   try {
     const user = await UserSchema.checkCredentials(req.body);
     const newAccessToken = await generateAccessToken({ _id: user._id });
-    console.log(newAccessToken);
 
-    res.send({accessToken: newAccessToken});
+    res.send({ accessToken: newAccessToken });
   } catch (error) {
     next(error);
   }

@@ -5,7 +5,7 @@ import mongoose from "mongoose";
 
 const chatRouter = express.Router();
 
-chatRouter.get("/activeChat/:id", JWTAuthMiddleware, async (req, res, next)=>{
+chatRouter.get("/activeChat/:id", JWTAuthMiddleware, async (req, res, next) => {
   try {
     const commonChat = await ChatSchema.find({
       $and: [
@@ -13,11 +13,11 @@ chatRouter.get("/activeChat/:id", JWTAuthMiddleware, async (req, res, next)=>{
         { members: { $in: [req.user._id] } }
       ]
     });
-    res.send(commonChat)
+    res.send(commonChat);
   } catch (error) {
-    next(error)
+    next(error);
   }
-})
+});
 
 chatRouter.post("/", JWTAuthMiddleware, async (req, res, next) => {
   try {
@@ -33,7 +33,6 @@ chatRouter.post("/", JWTAuthMiddleware, async (req, res, next) => {
         { members: { $in: [reciverId] } }
       ]
     });
-    console.log(commonChat);
 
     if (commonChat.length > 0) {
       const updatedCommonChat = await ChatSchema.findByIdAndUpdate(
